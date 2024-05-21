@@ -6,14 +6,33 @@ let app = express();
 let stripe = new Stripe(STRIPE_SECRET_KEY);
 
 app.get('/products', async (_req, res) => {
-  const products = await stripe.products.list({
-    active: true,
-    expand: ['data.default_price'],
-  });
+  try {
+    const products = await stripe.products.list({
+      active: true,
+      expand: ['data.default_price'],
+    });
 
-  res.json({
-    products: products.data,
-  });
+    let productsData = products.data.map((product) => {
+      let defaultPrice = product.default_price as Stripe.Price;
+
+      return {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: (defaultPrice?.unit_amount || 0) / 100,
+        currency: defaultPrice?.currency,
+      };
+    });
+
+    res.json({
+      products: productsData,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: 'Internal server error',
+    });
+  }
 });
 
 app.post('/create-checkout-session', async (_req, res) => {
