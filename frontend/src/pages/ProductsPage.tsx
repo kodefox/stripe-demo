@@ -9,7 +9,9 @@ import {
   NumberInput,
   NumberInputField,
   NumberInputStepper,
+  Spinner,
   Text,
+  useBoolean,
 } from "@chakra-ui/react";
 import { API_URL } from "../constants";
 
@@ -25,6 +27,7 @@ type Product = {
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setLoading] = useBoolean(true);
 
   const fetchProducts = async () => {
     const response = await fetch(`${API_URL}/products`);
@@ -36,10 +39,12 @@ export default function ProductsPage() {
         qty: 0,
       }))
     );
+    setLoading.off();
   };
 
   useEffect(() => {
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onChangeQty = (productId: string, qty: number) => {
@@ -73,6 +78,8 @@ export default function ProductsPage() {
       <Text fontSize="2xl" as="b">
         Product List
       </Text>
+
+      {isLoading && <Spinner alignSelf="center" />}
 
       <List spacing={3}>
         {products.map((product) => (
@@ -115,15 +122,15 @@ export default function ProductsPage() {
 
       {/* <Box display="flex" flexDir="row" alignItems="center" gap={4}> */}
       <Button
-        bgColor="dodgerblue"
-        color="white"
+        colorScheme="blue"
         width="100%"
+        isDisabled={isLoading}
         onClick={checkoutWithStripeHostedPage}
       >
         Checkout (Stripe Hosted Page)
       </Button>
 
-      <Button bgColor="dodgerblue" color="white" width="100%">
+      <Button colorScheme="blue" width="100%" isDisabled={isLoading}>
         Checkout (Custom Payment Flow)
       </Button>
       {/* </Box> */}
