@@ -67,6 +67,35 @@ app.post('/create-checkout-session', async (req, res) => {
   }
 });
 
+app.post('/create-payment-intent', async (req, res) => {
+  try {
+    const products = req.body.products as {
+      priceId: string;
+      price: number;
+      qty: number;
+    }[];
+    console.log('req.body: ', req.body);
+    const amount = products.reduce(
+      (acc, curr) => acc + curr.price * curr.qty,
+      0,
+    );
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount * 100, // Stripe receive amount in cents
+      currency: 'usd',
+    });
+
+    res.send({
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: 'Internal server error',
+    });
+  }
+});
+
 app.post(
   '/stripe-webhook',
   express.raw({ type: 'application/json' }),
@@ -88,6 +117,7 @@ app.post(
 
     // Handle the event
     switch (event.type) {
+      // TODO: Set payment intent created/processing/complete/error handler
       case 'checkout.session.completed':
         const checkoutSessionCompleted = event.data.object;
         // Then define and call a function to handle the event checkout.session.completed
