@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -12,10 +12,12 @@ import {
   Spinner,
   Text,
   useBoolean,
-} from "@chakra-ui/react";
-import { API_URL } from "../constants";
+  useDisclosure,
+} from '@chakra-ui/react';
+import { API_URL } from '../constants';
+import PaymentModal from '../components/PaymentModal';
 
-type Product = {
+export type Product = {
   id: string;
   name: string;
   description: string;
@@ -28,6 +30,7 @@ type Product = {
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setLoading] = useBoolean(true);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const fetchProducts = async () => {
     const response = await fetch(`${API_URL}/products`);
@@ -37,7 +40,7 @@ export default function ProductsPage() {
       productsResponse.products.map((product: Product) => ({
         ...product,
         qty: 0,
-      }))
+      })),
     );
     setLoading.off();
   };
@@ -50,17 +53,17 @@ export default function ProductsPage() {
   const onChangeQty = (productId: string, qty: number) => {
     setProducts((prevProducts) =>
       prevProducts.map((product) =>
-        product.id === productId ? { ...product, qty } : product
-      )
+        product.id === productId ? { ...product, qty } : product,
+      ),
     );
   };
 
   const checkoutWithStripeHostedPage = async () => {
     const response = await fetch(`${API_URL}/create-checkout-session`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/json",
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         products: products
@@ -99,7 +102,7 @@ export default function ProductsPage() {
                 {product.description}
               </Text>
               <Text fontSize="sm" as="b" color="dodgerblue">
-                {product.price.toLocaleString()}{" "}
+                {product.price.toLocaleString()}{' '}
                 {product.currency.toUpperCase()}
               </Text>
             </Box>
@@ -130,9 +133,17 @@ export default function ProductsPage() {
         Checkout (Stripe Hosted Page)
       </Button>
 
-      <Button colorScheme="blue" width="100%" isDisabled={isLoading}>
+      <Button
+        colorScheme="blue"
+        width="100%"
+        isDisabled={isLoading}
+        onClick={onOpen}
+      >
         Checkout (Custom Payment Flow)
       </Button>
+      {isOpen ? (
+        <PaymentModal onClose={onClose} products={products} />
+      ) : undefined}
       {/* </Box> */}
 
       {/* <Text>
