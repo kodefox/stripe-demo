@@ -1,8 +1,12 @@
 import express from 'express';
 import Stripe from 'stripe';
-import { API_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from './constants';
+import cors from 'cors';
+import { APP_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from './constants';
 
 let app = express();
+app.use(cors());
+app.use(express.json({ limit: '20mb' }));
+
 let stripe = new Stripe(STRIPE_SECRET_KEY);
 
 app.get('/products', async (_req, res) => {
@@ -19,6 +23,7 @@ app.get('/products', async (_req, res) => {
         id: product.id,
         name: product.name,
         description: product.description,
+        priceId: defaultPrice?.id,
         price: (defaultPrice?.unit_amount || 0) / 100,
         currency: defaultPrice?.currency,
       };
@@ -35,23 +40,31 @@ app.get('/products', async (_req, res) => {
   }
 });
 
-app.post('/create-checkout-session', async (_req, res) => {
-  const session = await stripe.checkout.sessions.create({
-    line_items: [
-      {
-        // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-        price: 'price_1PHiMXGmlXG2ESEP0MiA5QuX',
-        quantity: 1,
-      },
-    ],
-    mode: 'payment',
-    success_url: `${API_URL}?success=true`,
-    cancel_url: `${API_URL}?canceled=true`,
-  });
+app.post('/create-checkout-session', async (req, res) => {
+  try {
+    const products = req.body.products as { priceId: string; qty: number }[];
 
-  res.json({
-    session,
-  });
+    const line_items = products.map((product) => ({
+      price: product.priceId,
+      quantity: product.qty,
+    }));
+
+    const session = await stripe.checkout.sessions.create({
+      line_items,
+      mode: 'payment',
+      success_url: `${APP_URL}/success`,
+      cancel_url: `${APP_URL}`,
+    });
+
+    res.json({
+      url: session.url,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: 'Internal server error',
+    });
+  }
 });
 
 app.post(
