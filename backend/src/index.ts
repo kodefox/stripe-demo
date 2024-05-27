@@ -5,6 +5,7 @@ import { APP_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from './constants';
 
 let app = express();
 app.use(cors());
+app.use('/stripe-webhook', express.raw({ type: 'application/json' }));
 app.use(express.json({ limit: '20mb' }));
 
 let stripe = new Stripe(STRIPE_SECRET_KEY);
@@ -96,42 +97,39 @@ app.post('/create-payment-intent', async (req, res) => {
   }
 });
 
-app.post(
-  '/stripe-webhook',
-  express.raw({ type: 'application/json' }),
-  (req, res) => {
-    const sig = req.headers['stripe-signature'] || '';
+app.post('/stripe-webhook', (req, res) => {
+  const sig = req.headers['stripe-signature'] || '';
 
-    let event;
+  let event;
 
-    try {
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        STRIPE_WEBHOOK_SECRET,
-      );
-    } catch (err: any) {
-      res.status(400).send(`Webhook Error: ${err.message}`);
-      return;
-    }
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      STRIPE_WEBHOOK_SECRET,
+    );
+  } catch (err: any) {
+    console.log(err);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
 
-    // Handle the event
-    switch (event.type) {
-      // TODO: Set payment intent created/processing/complete/error handler
-      case 'checkout.session.completed':
-        const checkoutSessionCompleted = event.data.object;
-        // Then define and call a function to handle the event checkout.session.completed
+  // Handle the event
+  switch (event.type) {
+    // TODO: Set payment intent created/processing/complete/error handler
+    case 'checkout.session.completed':
+      const checkoutSessionCompleted = event.data.object;
+      // Then define and call a function to handle the event checkout.session.completed
 
-        break;
-      // ... handle other event types
-      default:
-        console.log(`Unhandled event type ${event.type}`);
-    }
+      break;
+    // ... handle other event types
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
 
-    // Return a 200 response to acknowledge receipt of the event
-    res.send();
-  },
-);
+  // Return a 200 response to acknowledge receipt of the event
+  res.send();
+});
 
 app.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');
