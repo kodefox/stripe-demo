@@ -48,7 +48,7 @@ export default function ProductsPage() {
       productsResponse.products.map((product: Product) => ({
         ...product,
         qty: 0,
-      }))
+      })),
     );
     setLoading.off();
   };
@@ -61,8 +61,8 @@ export default function ProductsPage() {
   const onChangeQty = (productId: string, qty: number) => {
     setProducts((prevProducts) =>
       prevProducts.map((product) =>
-        product.id === productId ? { ...product, qty } : product
-      )
+        product.id === productId ? { ...product, qty } : product,
+      ),
     );
   };
 
@@ -178,9 +178,7 @@ export default function ProductsPage() {
       >
         Checkout (Custom Payment Flow)
       </Button>
-      {isOpen ? (
-        <PaymentModal onClose={onClose} products={products} />
-      ) : undefined}
+      <PaymentModal isOpen={isOpen} onClose={onClose} products={products} />
 
       {isEmbeddedFormOpen && (
         <EmbeddedFormModal

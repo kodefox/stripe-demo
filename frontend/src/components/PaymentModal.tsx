@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import {
+  Box,
   Button,
+  HStack,
+  List,
   Modal,
   ModalBody,
-  ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   Text,
   useBoolean,
 } from "@chakra-ui/react";
@@ -23,9 +26,11 @@ import { Product } from "../pages/ProductsPage";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 export default function PaymentModal({
+  isOpen,
   products,
   onClose,
 }: {
+  isOpen: boolean;
   products: Product[];
   onClose: () => void;
 }) {
@@ -53,12 +58,14 @@ export default function PaymentModal({
       const { clientSecret } = await response.json();
       setPaymentIntentSecret(clientSecret);
     };
-    fetchPaymentIntent();
-  }, [products]);
+    if (isOpen) {
+      fetchPaymentIntent();
+    }
+  }, [products, isOpen]);
 
   return (
     <Modal
-      isOpen
+      isOpen={isOpen}
       onClose={() => {
         onClose();
         setPaymentIntentSecret(null);
@@ -72,18 +79,20 @@ export default function PaymentModal({
             clientSecret: paymentIntentSecret,
           }}
         >
-          <PaymentModalContent />
+          <PaymentModalContent
+            products={products.filter((product) => product.qty > 0)}
+          />
         </Elements>
       ) : (
         <ModalContent>
-          <Text>Loading</Text>
+          <Spinner />
         </ModalContent>
       )}
     </Modal>
   );
 }
 
-function PaymentModalContent() {
+function PaymentModalContent({ products }: { products: Product[] }) {
   const stripe = useStripe();
   const elements = useElements();
   const [isLoading, setIsLoading] = useBoolean(false);
@@ -107,19 +116,46 @@ function PaymentModalContent() {
     // your `return_url`. For some payment methods like iDEAL, your customer will
     // be redirected to an intermediate site first to authorize the payment, then
     // redirected to the `return_url`.
-    if (error.type === "card_error" || error.type === "validation_error") {
-      // TODO:Show error
-    } else {
-      // TODO:Show error
-    }
-
     setIsLoading.off();
+    if (error.type === "card_error" || error.type === "validation_error") {
+      // Can show toast of card decline or payment specific error
+      window.location.replace("/failed");
+    } else {
+      // Put a generic error message in here
+      window.location.replace("/failed");
+    }
   };
+  const totalAmount = products.reduce(
+    (acc, curr) => acc + curr.price * curr.qty,
+    0,
+  );
   return (
-    <ModalContent>
+    <ModalContent padding={4}>
       <ModalHeader>Complete Payment</ModalHeader>
-      <ModalCloseButton />
       <ModalBody>
+        <List spacing={3}>
+          {products.map((product) => (
+            <Box>
+              <Text as="b">{product.name}</Text>
+              <Text fontSize="sm" color="GrayText">
+                {product.description}
+              </Text>
+              <HStack>
+                <Text fontSize="sm" as="b" color="dodgerblue">
+                  Price: {product.price.toLocaleString()}{" "}
+                  {product.currency.toUpperCase()}
+                </Text>
+                <Text fontSize="sm" as="b" color="dodgerblue">
+                  Amount: {product.qty}
+                </Text>
+              </HStack>
+            </Box>
+          ))}
+        </List>
+        <Text as="b">
+          Total Amount: {totalAmount} {products[0].currency.toUpperCase()}
+        </Text>
+
         <PaymentElement id="payment-element" />
         <Button
           colorScheme="blue"
@@ -127,6 +163,7 @@ function PaymentModalContent() {
           isDisabled={isLoading}
           isLoading={isLoading}
           onClick={handleSubmit}
+          mt={10}
         >
           Pay Now
         </Button>
