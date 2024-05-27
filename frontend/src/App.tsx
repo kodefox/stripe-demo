@@ -1,6 +1,7 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import ProductsPage from "./pages/ProductsPage";
 import SuccessPage from "./pages/SuccessPage";
+import ReturnPage from "./pages/ReturnPage";
 
 const router = createBrowserRouter([
   {
@@ -10,6 +11,10 @@ const router = createBrowserRouter([
   {
     path: "/success",
     element: <SuccessPage />,
+  },
+  {
+    path: "/return",
+    element: <ReturnPage />,
   },
 ]);
 

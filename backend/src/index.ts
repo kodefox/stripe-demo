@@ -43,6 +43,7 @@ app.get('/products', async (_req, res) => {
 
 app.post('/create-checkout-session', async (req, res) => {
   try {
+    const isEmbedded = req.body.isEmbedded as boolean;
     const products = req.body.products as { priceId: string; qty: number }[];
 
     const line_items = products.map((product) => ({
@@ -51,14 +52,19 @@ app.post('/create-checkout-session', async (req, res) => {
     }));
 
     const session = await stripe.checkout.sessions.create({
+      ui_mode: isEmbedded ? 'embedded' : 'hosted',
       line_items,
       mode: 'payment',
-      success_url: `${APP_URL}/success`,
-      cancel_url: `${APP_URL}`,
+      ...(isEmbedded && {
+        return_url: `${APP_URL}/return?session_id={CHECKOUT_SESSION_ID}`,
+      }),
+      ...(!isEmbedded && { cancel_url: `${APP_URL}` }),
+      ...(!isEmbedded && { success_url: `${APP_URL}/success` }),
     });
 
     res.json({
       url: session.url,
+      clientSecret: session.client_secret,
     });
   } catch (error) {
     console.log(error);
@@ -82,7 +88,7 @@ app.post('/create-payment-intent', async (req, res) => {
     );
 
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100, // Stripe receive amount in cents
+      amount: Number((amount * 100).toFixed(0)), // Stripe receive amount in cents
       currency: 'usd',
     });
 
@@ -95,6 +101,17 @@ app.post('/create-payment-intent', async (req, res) => {
       error: 'Internal server error',
     });
   }
+});
+
+app.get('/session-status', async (req, res) => {
+  const session = await stripe.checkout.sessions.retrieve(
+    req.query.session_id as string,
+  );
+
+  res.send({
+    status: session.status,
+    customer_email: session.customer_details?.email,
+  });
 });
 
 app.post('/stripe-webhook', (req, res) => {

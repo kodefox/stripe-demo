@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   Button,
   Modal,
@@ -9,16 +9,16 @@ import {
   ModalOverlay,
   Text,
   useBoolean,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 import {
   PaymentElement,
   useStripe,
   useElements,
   Elements,
-} from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import { API_URL } from '../constants';
-import { Product } from '../pages/ProductsPage';
+} from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import { API_URL } from "../constants";
+import { Product } from "../pages/ProductsPage";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -34,10 +34,10 @@ export default function PaymentModal({
   useEffect(() => {
     const fetchPaymentIntent = async () => {
       const response = await fetch(`${API_URL}/create-payment-intent`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json',
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           products: products
@@ -98,7 +98,7 @@ function PaymentModalContent() {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: 'http://localhost:5173/success',
+        return_url: "http://localhost:5173/success",
       },
     });
 
@@ -107,7 +107,7 @@ function PaymentModalContent() {
     // your `return_url`. For some payment methods like iDEAL, your customer will
     // be redirected to an intermediate site first to authorize the payment, then
     // redirected to the `return_url`.
-    if (error.type === 'card_error' || error.type === 'validation_error') {
+    if (error.type === "card_error" || error.type === "validation_error") {
       // TODO:Show error
     } else {
       // TODO:Show error
@@ -117,7 +117,7 @@ function PaymentModalContent() {
   };
   return (
     <ModalContent>
-      <ModalHeader>Modal Title</ModalHeader>
+      <ModalHeader>Complete Payment</ModalHeader>
       <ModalCloseButton />
       <ModalBody>
         <PaymentElement id="payment-element" />
