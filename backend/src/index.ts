@@ -81,7 +81,6 @@ app.post('/create-payment-intent', async (req, res) => {
       price: number;
       qty: number;
     }[];
-    console.log('req.body: ', req.body);
     const amount = products.reduce(
       (acc, curr) => acc + curr.price * curr.qty,
       0,
@@ -134,6 +133,36 @@ app.post('/stripe-webhook', (req, res) => {
   // Handle the event
   switch (event.type) {
     // TODO: Set payment intent created/processing/complete/error handler
+    case 'payment_intent.created': {
+      console.log(
+        'catching event of payment intent created ==> We could create a db call here to create our own payment entity',
+      );
+      break;
+    }
+    case 'payment_intent.succeeded': {
+      console.log(
+        'catching event of payment intent succeeded ==> We could create a db call here to update our own payment entity status',
+      );
+      break;
+    }
+    case 'payment_intent.payment_failed': {
+      console.log(
+        'catching event of payment intent failed ==> We could create a db call here to update our own payment entity status',
+      );
+      break;
+    }
+    case 'charge.succeeded': {
+      console.log('catching event of card successfully charged');
+      break;
+    }
+    case 'charge.failed': {
+      console.log('catching event of card failed charged');
+      break;
+    }
+    case 'charge.updated': {
+      console.log('catching event of card status update');
+      break;
+    }
     case 'checkout.session.completed':
       const checkoutSessionCompleted = event.data.object;
       // Then define and call a function to handle the event checkout.session.completed
