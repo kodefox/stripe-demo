@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -13,10 +13,10 @@ import {
   Text,
   useBoolean,
   useDisclosure,
-} from "@chakra-ui/react";
-import { API_URL } from "../constants";
-import PaymentModal from "../components/PaymentModal";
-import EmbeddedFormModal from "../components/EmbeddedFormModal";
+} from '@chakra-ui/react';
+import { API_URL } from '../constants';
+import PaymentModal from '../components/PaymentModal';
+import EmbeddedFormModal from '../components/EmbeddedFormModal';
 
 export type Product = {
   id: string;
@@ -38,7 +38,7 @@ export default function ProductsPage() {
     onClose: onCloseEmbeddedForm,
   } = useDisclosure();
 
-  const [clientSecret, setClientSecret] = useState("");
+  const [clientSecret, setClientSecret] = useState('');
 
   const fetchProducts = async () => {
     const response = await fetch(`${API_URL}/products`);
@@ -48,7 +48,7 @@ export default function ProductsPage() {
       productsResponse.products.map((product: Product) => ({
         ...product,
         qty: 0,
-      })),
+      }))
     );
     setLoading.off();
   };
@@ -61,17 +61,17 @@ export default function ProductsPage() {
   const onChangeQty = (productId: string, qty: number) => {
     setProducts((prevProducts) =>
       prevProducts.map((product) =>
-        product.id === productId ? { ...product, qty } : product,
-      ),
+        product.id === productId ? { ...product, qty } : product
+      )
     );
   };
 
   const checkoutWithStripeHostedPage = async () => {
     const response = await fetch(`${API_URL}/create-checkout-session`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/json",
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         products: products
@@ -86,10 +86,10 @@ export default function ProductsPage() {
 
   const checkoutWithEmbeddedForm = async () => {
     const response = await fetch(`${API_URL}/create-checkout-session`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/json",
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         isEmbedded: true,
@@ -105,7 +105,13 @@ export default function ProductsPage() {
   };
 
   return (
-    <Flex margin={4} justifyContent="center" flexDirection="column" gap={6}>
+    <Flex
+      margin={8}
+      mx={32}
+      justifyContent="center"
+      flexDirection="column"
+      gap={6}
+    >
       <Text fontSize="2xl" as="b">
         Product List
       </Text>
@@ -130,7 +136,7 @@ export default function ProductsPage() {
                 {product.description}
               </Text>
               <Text fontSize="sm" as="b" color="dodgerblue">
-                {product.price.toLocaleString()}{" "}
+                {product.price.toLocaleString()}{' '}
                 {product.currency.toUpperCase()}
               </Text>
             </Box>
@@ -151,8 +157,8 @@ export default function ProductsPage() {
         ))}
       </List>
 
-      {/* <Box display="flex" flexDir="row" alignItems="center" gap={4}> */}
       <Button
+        mt={6}
         colorScheme="blue"
         width="100%"
         isDisabled={isLoading}
@@ -178,6 +184,7 @@ export default function ProductsPage() {
       >
         Checkout (Custom Payment Flow)
       </Button>
+
       <PaymentModal isOpen={isOpen} onClose={onClose} products={products} />
 
       {isEmbeddedFormOpen && (
@@ -186,15 +193,6 @@ export default function ProductsPage() {
           onClose={onCloseEmbeddedForm}
         />
       )}
-
-      {/* </Box> */}
-
-      {/* <Text>
-        Total Price:{" "}
-        {products
-          .reduce((acc, product) => acc + product.qty * product.price, 0)
-          .toFixed(2)}
-      </Text> */}
     </Flex>
   );
 }

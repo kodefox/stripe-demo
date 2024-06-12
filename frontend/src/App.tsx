@@ -1,24 +1,24 @@
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import ProductsPage from "./pages/ProductsPage";
-import SuccessPage from "./pages/SuccessPage";
-import ReturnPage from "./pages/ReturnPage";
-import FailedPage from "./pages/FailedPage";
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import ProductsPage from './pages/ProductsPage';
+import SuccessPage from './pages/SuccessPage';
+import ReturnPage from './pages/ReturnPage';
+import FailedPage from './pages/FailedPage';
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <ProductsPage />,
   },
   {
-    path: "/success",
+    path: '/success',
     element: <SuccessPage />,
   },
   {
-    path: "/failed",
+    path: '/failed',
     element: <FailedPage />,
   },
   {
-    path: "/return",
+    path: '/return',
     element: <ReturnPage />,
   },
 ]);

@@ -1,15 +1,15 @@
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe } from '@stripe/stripe-js';
 import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout,
-} from "@stripe/react-stripe-js";
+} from '@stripe/react-stripe-js';
 import {
   Modal,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -23,7 +23,7 @@ export default function EmbeddedFormModal(props: Props) {
     <Modal isOpen onClose={props.onClose}>
       <ModalOverlay />
 
-      <ModalContent>
+      <ModalContent pb={4}>
         <ModalHeader>Complete Payment</ModalHeader>
         <ModalCloseButton />
         <EmbeddedCheckoutProvider

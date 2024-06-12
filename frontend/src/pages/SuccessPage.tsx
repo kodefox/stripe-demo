@@ -1,5 +1,5 @@
-import { Button, Flex, Text } from "@chakra-ui/react";
-import { CheckIcon } from "@chakra-ui/icons";
+import { Button, Flex, Text } from '@chakra-ui/react';
+import { CheckIcon } from '@chakra-ui/icons';
 
 export default function SuccessPage() {
   return (
@@ -14,7 +14,7 @@ export default function SuccessPage() {
       <Text fontSize="2xl" as="b">
         Payment Success!
       </Text>
-      <Button colorScheme="blue" onClick={() => window.location.replace("/")}>
+      <Button colorScheme="blue" onClick={() => window.location.replace('/')}>
         Back to Products
       </Button>
     </Flex>

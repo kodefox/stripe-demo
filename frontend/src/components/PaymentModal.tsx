@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -12,16 +12,16 @@ import {
   Spinner,
   Text,
   useBoolean,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 import {
   PaymentElement,
   useStripe,
   useElements,
   Elements,
-} from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { API_URL } from "../constants";
-import { Product } from "../pages/ProductsPage";
+} from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { API_URL } from '../constants';
+import { Product } from '../pages/ProductsPage';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -39,10 +39,10 @@ export default function PaymentModal({
   useEffect(() => {
     const fetchPaymentIntent = async () => {
       const response = await fetch(`${API_URL}/create-payment-intent`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           products: products
@@ -107,7 +107,7 @@ function PaymentModalContent({ products }: { products: Product[] }) {
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: "http://localhost:5173/success",
+        return_url: 'http://localhost:5173/success',
       },
     });
 
@@ -117,17 +117,17 @@ function PaymentModalContent({ products }: { products: Product[] }) {
     // be redirected to an intermediate site first to authorize the payment, then
     // redirected to the `return_url`.
     setIsLoading.off();
-    if (error.type === "card_error" || error.type === "validation_error") {
+    if (error.type === 'card_error' || error.type === 'validation_error') {
       // Can show toast of card decline or payment specific error
-      window.location.replace("/failed");
+      window.location.replace('/failed');
     } else {
       // Put a generic error message in here
-      window.location.replace("/failed");
+      window.location.replace('/failed');
     }
   };
   const totalAmount = products.reduce(
     (acc, curr) => acc + curr.price * curr.qty,
-    0,
+    0
   );
   return (
     <ModalContent padding={4}>
@@ -142,7 +142,7 @@ function PaymentModalContent({ products }: { products: Product[] }) {
               </Text>
               <HStack>
                 <Text fontSize="sm" as="b" color="dodgerblue">
-                  Price: {product.price.toLocaleString()}{" "}
+                  Price: {product.price.toLocaleString()}{' '}
                   {product.currency.toUpperCase()}
                 </Text>
                 <Text fontSize="sm" as="b" color="dodgerblue">
@@ -152,9 +152,11 @@ function PaymentModalContent({ products }: { products: Product[] }) {
             </Box>
           ))}
         </List>
-        <Text as="b">
-          Total Amount: {totalAmount} {products[0].currency.toUpperCase()}
-        </Text>
+        <Box my={4}>
+          <Text as="b">
+            Total Amount: {totalAmount} {products[0].currency.toUpperCase()}
+          </Text>
+        </Box>
 
         <PaymentElement id="payment-element" />
         <Button
